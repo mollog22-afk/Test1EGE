@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Esame Simulato EGE - 30 Domande Interattive</title>
+    <style>
+        :root {
+            --bg-color: #1a1a24;
+            --card-bg: #222233;
+            --text-color: #e0e0f0;
+            --accent-color: #00b4d8;
+            --accent-hover: #90e0ef;
+            --border-color: #3d3d5c;
+            --success-color: #2ec4b6;
+            --wrong-color: #e63946;
+            --selected-bg: #2a3a5c;
+            --selected-border: #00b4d8;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.5;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 3px solid var(--border-color);
+            padding-bottom: 25px;
+        }
+
+        h1 {
+            color: var(--accent-color);
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-style: italic;
+            opacity: 0.8;
+            font-size: 1.1em;
+        }
+
+        .quiz-card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 6px 12 rgba(0,0,0,0.4);
+            border: 1px solid var(--border-color);
+            transition: border 0.3s;
+        }
+
+        .q-number {
+            font-weight: bold;
+            color: var(--accent-color);
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .cat-50001 { background-color: #ff5c8a; color: #111; }
+        .cat-11352 { background-color: #ff9f1c; color: #111; }
+        .cat-epbd { background-color: #2ec4b6; color: #111; }
+        .cat-mercati { background-color: #9b5de5; color: #111; }
+        .cat-diagnosi { background-color: #e07a5f; color: #111; }
+
+        .question-text {
+            font-size: 1.25em;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .options-list {
+            list-style-type: none;
+            padding-left: 0;
+            margin-bottom: 0;
+        }
+
+        .option-item {
+            background-color: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-color);
+            padding: 14px 18px;
+            margin-bottom: 12px;
+            border-radius: 6px;
+            font-size: 1.05em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .option-item:hover {
+            background-color: rgba(255,255,255,0.08);
+            border-color: var(--accent-hover);
+        }
+
+        .option-item.selected {
+            background-color: var(--selected-bg);
+            border-color: var(--selected-border);
+            font-weight: 600;
+        }
+
+        /* Classi di correzione post-invio */
+        .quiz-card.corrected .option-item {
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .option-item.is-correct {
+            background-color: rgba(46, 196, 182, 0.2) !important;
+            border-color: var(--success-color) !important;
+            color: #a6e3a1;
+        }
+        .option-item.is-wrong {
+            background-color: rgba(230, 57, 70, 0.2) !important;
+            border-color: var(--wrong-color) !important;
+            color: #f38ba8;
+        }
+
+        .explanation-box {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: rgba(255,255,255,0.02);
+            border-left: 4px solid var(--accent-color);
+            border-radius: 4px;
+            font-size: 0.95em;
+        }
+
+        /* Risultati Finali */
+        .result-panel {
+            background-color: #252538;
+            border-radius: 10px;
+            padding: 35px;
+            text-align: center;
+            margin-top: 40px;
+            border: 2px solid var(--border-color);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: #111;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .score-display {
+            font-size: 2em;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .outcome-badge {
+            display: inline-block;
+            padding: 10px 25px;
+            border-radius: 30px;
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-top: 15px;
+            text-transform: uppercase;
+        }
+
+        .outcome-pass { background-color: var(--success-color); color: #111; }
+        .outcome-fail { background-color: var(--wrong-color); color: #111; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Simulatore d'Esame Certificazione EGE</h1>
+        <p class="subtitle">Verifica Interattiva - 30 Quesiti (Soglia di superamento: 60%)</p>
+    </header>
+
+    <div id="quiz-form">
+        <!-- I blocchi delle domande vengono gestiti con attributi specifici per tracciare la corretta via JS -->
+        
+        <!-- D1 -->
+        <div class="quiz-card" data-correct="B">
+            <div class="q-number">Domanda 1</div>
+            <span class="category-badge cat-50001">ISO 50001</span>
+            <div class="question-text">Quale delle seguenti definizioni esprime correttamente il concetto di SEU (Significant Energy Use) secondo la norma ISO 50001?</div>
+            <ul class="options-list">
+                <li class="option-item" data-opt="A">A) Qualsiasi impianto che utilizzi combustibili fossili anziché fonti rinnovabili.</li>
+                <li class="option-item" data-opt="B">B) Un uso dell'energia che rappresenta una quota rilevante del consumo energetico o che offre un potenziale considerevole di miglioramento della prestazione energetica.</li>
+                <li class="option-item" data-opt="C">C) Il consumo energetico totale calcolato esclusivamente sull'edificio direzionale dell'azienda.</li>
+                <li class="option-item" data-opt="D">D) Un indicatore numerico che esprime il rapporto tra fatturato aziendale e vettori energetici acquistati.</li>
+            </ul>
+            <div class="explanation-box"><strong>Nota didattica:</strong> La significatività unisce l'entità del consumo al margine potenziale di miglioramento gestibile dall'EGE.</div>
+        </div>
+
+        <!-- D2 -->
+        <div class="quiz-card" data-correct="A">
+            <div class="q-number">Domanda 2</div>
+            <span class="category-badge cat-50001">ISO 50001</span>
+            <div class="question-text">Che differenza fondamentale sussiste tra un Indicatore di Prestazione Energetica (EnPI) e una Baseline Energetica (EnB)?</div>
+            <ul class="options-list">
+                <li class="option-item" data-opt="A">A) L'EnPI esprime un valore quantitativo in un determinato periodo, mentre l'EnB rappresenta il riferimento temporale quantificato utilizzato come base di confronto.</li>
+                <li class="option-item" data-opt="B">B) L'EnPI si applica solo al settore industriale, mentre l'EnB si applica esclusivamente all'edilizia residenziale.</li>
+                <li class="option-item" data-opt="C">C) La ISO 50001 richiede obbligatoriamente la definizione degli EnPI ma considera l'EnB opzionale.</li>
+                <li class="option-item" data-opt="D">D) L'EnPI è un valore economico (€), mentre l'EnB è un valore strettamente fisico-tecnico (kWh).</li>
+            </ul>
+            <div class="explanation-box"><strong>Nota didattica:</strong> L'EnB è l'anno zero o di partenza (riferimento), l'EnPI è la metrica corrente di monitoraggio.</div>
+        </div>
+
+        <!-- D3 -->
+        <div class="quiz-card" data-correct="C">
+            <div class="q-number">Domanda 3</div>
+            <span class="category-badge cat-50001">ISO 50001</span>
+            <div class="question-text">Il concetto di "Normalizzazione" delle Baseline energetiche (EnB) serve principalmente a:</div>
+            <ul class="options-list">
+                <li class="option-item" data-opt="A">A) Ridurre i costi burocratici di certificazione energetica imposti dall'ente terzo.</li>
+                <li class="option-item" data-opt="B">B) Convertire tutti i vettori energetici in Tonnellate Equivalenti di Petrolio (TEP) standard.</li>
+                <li class="option-item" data-opt="C">C) Modificare l'EnB per tenere conto delle variazioni delle variabili rilevanti (es. volumi produttivi, fattori climatici) per consentire un confronto equo della prestazione.</li>
+                <li class="option-item" data-opt="D">D) Uniformare i consumi energetici di stabilimenti diversi appartenenti alla stessa multinazionale.</li>
+            </ul>
+            <div class="explanation-box"><strong>Nota didattica:</strong> Permette di isolare le performance energetiche della conduzione ed eliminare gli impatti legati a sbalzi meteo o produttivi.</div>
+        </div>
+
+        <!-- D4 -->
+        <div class="quiz-card" data-correct="B">
+            <div class="q-number">Domanda 4</div>
+            <span class="category-badge cat-50001">ISO 50001</span>
+            <div class="question-text">Chi ha la responsabilità ultima di definire, approvare e formalizzare la "Politica Energetica" all'interno di un'azienda strutturata secondo la ISO 50001?</div>
+            <ul class="options-list">
+                <li class="option-item" data-opt="A">A) L'EGE o l'Energy Manager nominato.</li>
+                <li class="option-item" data-opt="B">B) L'Alta Direzione (Top Management).</li>
+                <li class="option-item" data-opt="C">C) L'Auditor esterno incaricato dell'ispezione di terza parte.</li>
+                <li class="option-item" data-opt="D">D) L'RSPP aziendale o il responsabile della sicurezza.</li>
+            </ul>
+            <div class="explanation-box"><strong>Nota didattica:</strong> Regola HLS: L'Alta direzione risponde della Leadership strategica del sistema.</div>
+        </div>
+
+        <!-- D5 -->
+        <div class="quiz-card" data-correct="B">
+            <div class="q-number">Domanda 5</div>
+            <span class="category-badge cat-50001">ISO 50001</span>
+            <div class="question-text">Secondo la norma ISO 50001:2018, un "Fattore Statico" è definito come:</div>
+            <ul class="options-list">
+                <li class="option-item" data-opt="A">A) Una variabile che cambia continuamente, come i Gradi Giorno del riscaldamento.</li>
+                <li class="option-item" data-opt="B">B) Un fattore identificato che influenza la prestazione energetica e che non cambia significativamente (es. la dimensione dell'edificio o il numero di turni settimanali).</li>
+                <li class="option-item" data-opt="C">C) L'efficienza nominale di targa impressa su un motore elettrico dal produttore.</li>
+                <li class="option-item" data-opt="D">D) Un blocco normativo che impedisce lo sviluppo delle fonti rinnovabili.</li>
+            </ul>
+            <div class="explanation-box"><strong>Nota didattica:</strong> Se cambia un fattore statico (es. raddoppio cubatura fabbrica) la Baseline decade e va ricalcolata.</div>
+        </div>
+
+        <!-- D6 -->
+        <div class="quiz-card" data-correct="C">
+            <div class="q-number">Domanda 6</div>
+            <span class="category-badge cat-50001">ISO 50001</span>
+            <div class="question-text">Nel contesto del paragrafo 8.3 della ISO 50001 ("Approvvigionamento"), l'organizzazione cosa deve comunicare ai fornitori di servizi/prodotti che impattano sulle SEU?</div>
+            <ul class="options-list">
+                <li class="option-item" data-opt="A">A) L'elenco completo dei propri indicatori EnPI storici.</li>
+                <li class="option-item" data-opt="B">B) Esclusivamente il budget economico massimo stanziato per l'intervento.</li>
+                <li class="option-item" data-opt="C">C) Che l'acquisto sarà valutato, in parte, anche sulla base dei criteri di prestazione ed efficienza energetica del servizio o del prodotto fornito.</li>
+                <li class="option-item" data-opt="D">D) La copia conforme del certificato ISO 50001 dell'azienda.</li>
+            </ul>
+            <div class="explanation-box"><strong>Nota didattica:</strong> Vincola l'ufficio acquisti a integrare i consumi operativi pluriennali nei criteri di aggiudicazione delle gare.</div>
+        </div>
+
+        <!-- D7 -->
+        <div class="quiz-card" data-correct="B">
+            <div class="q-number">Domanda 7</div>
+            <span class="category-badge cat-50001">ISO 50001</span>
+            <div class="question-text">Cosa si intende per "Riesame della Direzione" nel ciclo PDCA della norma ISO 50001?</div>
+            <ul class="options-list">
+                <li class="option-item" data-opt="A">A) L'audit condotto dall'ente di certificazione accreditato prima del rilascio del bollino.</li>
+                <li class="option-item" data-opt="B">B) Una valutazione periodica svolta dall'Alta Direzione per verificare l'efficacia, l'adeguatezza e la continua idoneità del Sistema di Gestione dell'Energia.</li>
+                <li class="option-item" data-opt="C">C) La revisione contabile dei bilanci aziendali legati al pagamento delle utenze elettriche.</li>
+                <li class="option-item" data-opt="D">D) Il controllo ispettivo dei vigili del fuoco sui sistemi antincendio della centrale termica.</li>
+            </ul>
+            <div class="explanation-box"><strong>Nota didattica:</strong> Fase ACT: verifica se i target sono stati raggiunti e rimodula i piani strategici di efficienza.</div>
+        </div>
+
+        <!-- D8 -->
+        <div class="quiz-card" data-correct="B">
+            <div class="q-number">Domanda 8</div>
+            <span class="category-badge cat-11352">UNI 11352 & EPC</span>
+            <div class="question-text">La norma UNI 11352 stabilisce i requisiti minimi di quale tipologia di organizzazione del mercato energetico?</div>
+            <ul class="options-list">
+                <li class="option-item" data-opt="A">A) I venditori al dettaglio di gas metano ed energia elettrica sul mercato tutelato.</li>
+                <li class="option-item" data-opt="B">B) Le Società di Servizi Energetici (ESCo) che intendono offrire servizi di efficienza energetica con garanzia dei risultati.</li>
+                <li class="option-item" data-opt="C">C) I produttori di componentistica meccanica ed elettrica per impianti da fonti rinnovabili.</li>
+                <li class="option-item" data-opt="D">D) Gli organismi paritetici bilaterali per la sicurezza sul lavoro nei cantieri edili.</li>
+            </ul>
+            <div class="explanation-box"><strong>Nota didattica:</strong> In Italia la 11352 è obbligatoria per le ESCo per operare nella PA e richiedere Certificati Bianchi.</div>
+        </div>
+
+        <!-- D9 -->
+        <div class="quiz-card" data-correct="B">
+            <div class="q-number">Domanda 9</div>
+            <span class="category-badge cat-11352">UNI 11352 & EPC</span>
+            <div class="question-text">In un contratto EPC (Energy Performance Contract) strutturato secondo la formula "Guaranteed Savings" (Risparmio Garantito):</div>
+            <ul class="options-list">
+                <li class="option-item" data-opt="A">A) La ESCo finanzia interamente l'investimento tramite risorse proprie e riscatta i risparmi.</li>
+                <li class="option-item" data-opt="B">B) Il cliente finanzia direttamente l'intervento, mentre la ESCo garantisce contrattualmente il livello di risparmio energetico minimo.</li>
+                <li class="option-item" data-opt="C">C) Nessuna delle parti rischia nulla in quanto l'investimento è a fondo perduto statale.</li>
+                <li class="option-item" data-opt="D">D) Il risparmio viene calcolato solo in base alle fluttuazioni al ribasso delle tariffe del PUN.</li>
+            </ul>
+            <div class="explanation-box"><strong>Nota didattica:</strong> Nel Guaranteed il rischio finanziario è del cliente (finanziamento proprio), la ESCo risponde solo del rischio tecnico.</div>
+        </div>
+
+        <!-- D10 -->
+        <div class="quiz-card" data-correct="B">
+            <div class="q-number">Domanda 10</div>
+            <span class="category-badge cat-11352">UNI 11352 & EPC</span>
+            <div class="question-text">Quale elemento NON può assolutamente mancare in un contratto a prestazioni energetiche (EPC) conforme alla norma UNI 11352?</div>
+            <ul class="options-list">
+                <li class="option-item" data-opt="A">A) La garanzia di assunzione del rischio finanziario totale da parte del cliente in ogni caso.</li>
+                <li class="option-item" data-opt="B">B) L'indicazione dettagliata del metodo per la misurazione, la verifica e la rendicontazione dei risparmi ottenuti.</li>
+                <li class="option-item" data-opt="C">C) Il vincolo di acquisto dei vettori di energia elettrica e gas esclusivamente dalla ESCo stessa.</li>
+                <li class="option-item" data-opt="D">D) Un sistema di pagamento basato interamente su rate fisse indipendenti dalle prestazioni degli impianti.</li>
+            </ul>
+            <div class="explanation-box"><strong>Nota didattica:</strong> Regola cardine della 11352: deve essere esplicito il protocollo di verifica (es. IPMVP).</div>
+        </div>
+
+        <!-- D11 -->
+        <div class="quiz-card" data-correct="C">
+            <div class="q-number">Domanda 11</div>
+            <span class="category-badge cat-11352">UNI 11352 & EPC</span>
+            <div class="question-text">Cosa succede se, in un contratto EPC regolamentato, il risparmio energetico effettivo misurato a fine anno risulta INFERIORE a quello minimo contrattualmente garantito dalla ESCo?</div>
+            <ul class="options-list">
+                <li class="option-item" data-opt="A">A) Il cliente è obbligato a pagare la differenza alla ESCo per non farla fallire.</li>
+                <li class="option-item" data-opt="B">B) Il contratto si risolve automaticamente senza penali e l'impianto viene smantellato.</li>
+                <li class="option-item" data-opt="C">C) La ESCo deve risarcire economicamente o compensare il cliente per il mancato risparmio pattuito, secondo le penali previste nel contratto.</li>
+                <li class="option-item" data-opt="D">D) La differenza viene coperta tramite i fondi di riserva del GSE.</li>
+            </ul>
+            <div class="explanation-box"><strong>Nota didattica:</strong> È il nocciolo del rischio tecnico d'ingegneria in capo alla ESCo.</div>
+        </div>
+
+        <!-- D12 -->
+        <div class="quiz-card" data-correct="A">
+            <div class="q-number">Domanda 12</div>
+            <span class="category-badge cat-11352">UNI 11352 & EPC</span>
+            <div class="question-text">Quale delle seguenti attività rientra tra le competenze minime che una ESCo certificata UNI 11352 deve saper svolgere internamente o tramite professionisti qualificati (es. EGE)?</div>
+            <ul class="options-list">
+                <li class="option-item" data-opt="A">A) Progettazione, installazione, conduzione, manutenzione e monitoraggio degli interventi di efficienza energetica.</li>
+                <li class="option-item" data-opt="B">B) Esclusivamente attività di brokeraggio e compravendita di quote di borsa energetica.</li>
+                <li class="option-item" data-opt="C">C) Certificazione di conformità degli impianti antincendio industriali complessi.</li>
+                <li class="option-item" data-opt="D">D) Vendita di polizze assicurative generiche sulle coperture dei capannoni.</li>
+            </ul>
+            <div class="explanation-box"><strong>Nota didattica:</strong> Gestione integrata e full-service delle attività termotecniche ed elettriche.</div>
+        </div>
+
+        <!-- D13 -->
+        <div class="quiz-card" data-correct="B">
+            <div class="q-number">Domanda 13</div>
+            <span class="category-badge cat-11352">UNI 11352 & EPC</span>
+            <div class="question-text">Nell'ambito di un contratto EPC a "Risparmi Condivisi" (Shared Savings), come vengono remunerati gli interventi realizzati dalla ESCo?</div>
+            <ul class="options-list">
+                <li class="option-item" data-opt="A">A) Tramite un canone fisso mensile totalmente slegato dall'andamento dell'efficienza energetica.</li>
+                <li class="option-item" data-opt="B">B) Attraverso una percentuale prefissata del valore economico del risparmio energetico effettivamente generato e misurato nel tempo.</li>
+                <li class="option-item" data-opt="C">C) Tramite finanziamenti a fondo perduto della Comunità Europea erogati direttamente sul conto corrente del fornitore.</li>
+                <li class="option-item" data-opt="D">D) Solo mediante l'acquisizione delle quote societarie stabili dell'azienda cliente.</li>
+            </ul>
+            <div class="explanation-box"><strong>Nota didattica:</strong> Condivisione dei benefici: le quote monetarie derivano direttamente dal risparmio riscontrato.</div>
+        </div>
+
+        <!-- D14 -->
+        <div class="quiz-card" data-correct="B">
+            <div class="q-number">Domanda 14</div>
+            <span class="category-badge cat-11352">UNI 11352 & EPC</span>
+            <div class="question-text">Il concetto di "Addizionalità" nell'ambito dell'efficienza energetica e dei contratti delle ESCo indica:</div>
+            <ul class="options-list">
+                <li class="option-item" data-opt="A">A) L'aggiunta di penali economiche accessorie nel caso in cui le bollette non vengano pagate in tempo.</li>
+                <li class="option-item" data-opt="B">B) Che i risparmi generati devono essere superiori a quelli che si otterrebbero semplicemente applicando i minimi obbligatori di legge o standard di mercato attuali.</li>
+                <li class="option-item" data-opt="C">C) Il raddoppio dei punti di monitoraggio fisici per ogni linea elettrica installata.</li>
+                <li class="option-item" data-opt="D">D) L'incremento del costo del contratto all'aumentare dell'inflazione programmata.</li>
+            </ul>
+            <div class="explanation-box"><strong>Nota didattica:</strong> Concetto base per i TEE: l'intervento deve superare lo stato tecnologico inerziale o normativo corrente.</div>
+        </div>
+
+        <!-- D15 -->
+        <div class="quiz-card" data-correct="B">
+            <div class="q-number">Domanda 15</div>
+            <span class="category-badge cat-epbd">EPBD IV & Requisiti Minimi</span>
+            <div class="question-text">La nuova direttiva europea EPBD IV (Direttiva Case Green) sostituisce il vecchio target dei vecchi edifici NZEB (Nearly Zero Energy Building) con un nuovo standard costruttivo ancora più severo. Come si chiama?</div>
+            <ul class="options-list">
+                <li class="option-item" data-opt="A">A) PEB (Positive Energy Building)</li>
+                <li class="option-item" data-opt="B">B) ZEB (Zero-Emission Building - Edifici a Emissioni Zero)</li>
+                <li class="option-item" data-opt="C">C) Passive House Plus</li>
+                <li class="option-item" data-opt="D">D) Green Hub Structure</li>
+            </ul>
+            <div class="explanation-box"><strong>Nota didattica:</strong> Il nuovo paradigma europeo si concentra sull'azzeramento totale delle emissioni operative locali.</div>
+        </div>
+
+        <!-- D16 -->
+        <div class="quiz-card" data-correct="C">
+            <div class="q-number">Domanda 16</div>
+            <span class="category-badge cat-epbd">EPBD IV & Requisiti Minimi</span>
+            <div class="question-text">Qual è l'orientamento tassativo della Direttiva EPBD IV in merito all'utilizzo dei combustibili fossili (es. caldaie a gas metano) negli impianti termici degli edifici?</div>
+            <ul class="options-list">
+                <li class="option-item" data-opt="A">A) Estensione illimitata del loro uso purché accoppiati a isolamento a cappotto.</li>
+                <li class="option-item" data-opt="B">B) Divieto totale di installazione immediato a partire dal 2024 per qualsiasi tipologia di edificio.</li>
+                <li class="option-item" data-opt="C">C) Eliminazione graduale dei combustibili fossili nei sistemi di riscaldamento e raffrescamento entro il 2040, con stop ai sussidi finanziari per caldaie autonome a partire dal 2025/2026.</li>
+                <li class="option-item" data-opt="D">D) Sostituzione obbligatoria delle caldaie solo se di potenza inferiore a 10 kW.</li>
+            </ul>
+            <div class="explanation-box"><strong>Nota didattica:</strong> Importante per pianificare gli investimenti termici di lungo periodo del parco immobiliare.</div>
+        </div>
+
+        <!-- D17 -->
+        <div class="quiz-card" data-correct="B">
+            <div class="q-number">Domanda 17</div>
+            <span class="category-badge cat-epbd">EPBD IV & Requisiti Minimi</span>
+            <div class="question-text">In Italia, secondo il Decreto Requisiti Minimi, cos'è l'"Edificio di Riferimento" (Building di riferimento)?</div>
+            <ul class="options-list">
+                <li class="option-item" data-opt="A">A) Un modello reale di edificio ad altissima efficienza situato a Roma e usato come museo.</li>
+                <li class="option-item" data-opt="B">B) Un edificio virtuale, geometricamente identico a quello reale da progettare/ristrutturare, ma dotato di parametri termici e rendimenti impiantistici predefiniti per legge che funge da benchmark limite.</li>
+                <li class="option-item" data-opt="C">C) Il palazzo comunale principale di ogni provincia italiana.</li>
+                <li class="option-item" data-opt="D">D) La classe energetica G riportata sull'APE del vecchio catasto edilizio.</li>
+            </ul>
+            <div class="explanation-box"><strong>Nota didattica:</strong> È il gemello digitale normativo rispetto al quale la Legge 10 effettua le verifiche di conformità.</div>
+        </div>
+
+        <!-- D18 -->
+        <div class="quiz-card" data-correct="B">
+            <div class="q-number">Domanda 18</div>
+            <span class="category-badge cat-epbd">EPBD IV & Requisiti Minimi</span>
+            <div class="question-text">La Direttiva EPBD IV impone l'installazione progressiva di impianti solari (fotovoltaico e termico) su quali tipologie di edifici?</div>
+            <ul class="options-list">
+                <li class="option-item" data-opt="A">A) Solo ed esclusivamente sui monumenti storici vincolati dalle soprintendenze.</li>
+                <li class="option-item" data-opt="B">B) Su tutti i nuovi edifici pubblici e commerciali e, progressivamente, sugli edifici residenziali esistenti sottoposti a ristrutturazioni importanti.</li>
+                <li class="option-item" data-opt="C">C) Unicamente sulle stazioni di servizio e sui nodi autostradali.</li>
+                <li class="option-item" data-opt="D">D) Sugli edifici industriali isolati con consumi inferiori a 10.000 kWh/anno.</li>
+            </ul>
+            <div class="explanation-box"><strong>Nota didattica:</strong> Il fotovoltaico e il solare termico integrato passano da opzioni tecnologiche a requisiti di edificabilità strutturali.</div>
+        </div>
+
+        <!-- D19 -->
+        <div class="quiz-card" data-correct="B">
+            <div class="q-number">Domanda 19</div>
+            <span class="category-badge cat-epbd">EPBD IV & Requisiti Minimi</span>
+            <div class="question-text">Cosa esprime il fattore di conversione in energia primaria "non rinnovabile" (fp,nren) di un vettore energetico?</div>
+            <ul class="options-list">
+                <li class="option-item" data-opt="A">A) La quantità di anidride carbonica emessa al camino durante l'inverno.</li>
+                <li class="option-item" data-opt="B">B) Il rapporto tra l'energia primaria non rinnovabile consumata a monte della filiera e l'energia consegnata all'edificio all'estremità del contatore.</li>
+                <li class="option-item" data-opt="C">C) Il prezzo di borsa dell'energia convertito in tonnellate di carbone equivalente.</li>
+                <li class="option-item" data-opt="D">D) La percentuale di perdite elettriche sulle reti di trasmissione in alta tensione.</li>
+            </ul>
+            <div class="explanation-box"><strong>Nota didattica:</strong> Serve a pesare l'impatto ambientale e strutturale dei consumi finali negli indici degli APE.</div>
+        </div>
+
+        <!-- D20 -->
+        <div class="quiz-card" data-correct="B">
+            <div class="q-number">Domanda 20</div>
+            <span class="category-badge cat-epbd">EPBD IV & Requisiti Minimi</span>
+            <div class="question-text">Quale obbligo introduce la EPBD IV in merito ai sistemi di automazione e controllo degli edifici (BACS) per il comparto terziario/non residenziale?</div>
+            <ul class="options-list">
+                <li class="option-item" data-opt="A">A) L'adozione dei sistemi BACS è sempre facoltativa a discrezione del costruttore.</li>
+                <li class="option-item" data-opt="B">B) L'obbligo di installazione di BACS entro scadenze precise per gli edifici non residenziali dotati di impianti sopra determinate soglie di potenza utile nominale.</li>
+                <li class="option-item" data-opt="C">C) L'uso esclusivo di connessioni analogiche prive di tracciamento dati via cloud.</li>
+                <li class="option-item" data-opt="D">D) La disattivazione automatica di tutti i punti luce durante il fine settimana.</li>
+            </ul>
+            <div class="explanation-box"><strong>Nota didattica:</strong> I sistemi BACS (regolati in Italia dalla UNI EN ISO 52120-1) diventano vincolanti per efficientare il terziario energivoro.</div>
+        </div>
+
+        <!-- D21 -->
+        <div class="quiz-card" data-correct="B">
+            <div class="q-number">Domanda 21</div>
+            <span class="category-badge cat-epbd">EPBD IV & Requisiti Minimi</span>
+            <div class="question-text">In Italia, la verifica dei parametri di trasmittanza termica H'T (coefficiente globale di scambio termico per trasmissione) definita dai Decreti Requisiti Minimi si applica obbligatoriamente nei casi di:</div>
+            <ul class="options-list">
+                <li class="option-item" data-opt="A">A) Sola sostituzione del generatore di calore della centrale termica.</li>
+                <li class="option-item" data-opt="B">B) Nuova costruzione e ristrutturazioni importanti di primo livello.</li>
+                <li class="option-item" data-opt="C">C) Semplice tinteggiatura della facciata esterna priva di isolamento.</li>
+                <li class="option-item" data-opt="D">D) Installazione di un contatore elettrico aggiuntivo per ricarica veicoli.</li>
+            </ul>
+            <div class="explanation-box"><strong>Nota didattica:</strong> L'H'T valuta le dispersioni medie dell'intero involucro, inclusi i ponti termici strutturali.</div>
+        </div>
+
+        <!-- D22 -->
+        <div class="quiz-card" data-correct="B">
+            <div class="q-number">Domanda 22</div>
+            <span class="category-badge cat-mercati">Mercati Energetici</span>
+            <div class="question-text">Cosa indica l'acronimo PUN nel mercato elettrico italiano e come viene determinato?</div>
+            <ul class="options-list">
+                <li class="option-item" data-opt="A">A) Prezzo Unitario Nazionale, fissato semestralmente tramite decreto del Ministero dell'Ambiente.</li>
+                <li class="option-item" data-opt="B">B) Prezzo Unico Nazionale, calcolato come media ponderata oraria dei prezzi di vendita della Borsa Elettrica (IPEX) per la zona Italia.</li>
+                <li class="option-item" data-opt="C">C) Parametro di Utilità Nominale per il dimensionamento dei trasformatori di MT/BT.</li>
+                <li class="option-item" data-opt="D">D) Prezzo Unified dei Nuclei industriali applicato dai distributori locali.</li>
+            </ul>
+            <div class="explanation-box"><strong>Nota didattica:</strong> Cambia di ora in ora. Un EGE ne traccia l'andamento per calibrare i contratti di fornitura orari del cliente.</div>
+        </div>
+
+        <!-- D23 -->
+        <div class="quiz-card" data-correct="B">
+            <div class="q-number">Domanda 23</div>
+            <span class="category-badge cat-mercati">Mercati Energetici</span>
+            <div class="question-text">Nel mercato del gas naturale in Italia, l'indice di riferimento per i contratti di fornitura indicizzati all'ingrosso comunemente utilizzato è il PSV. Che cosa rappresenta?</div>
+            <ul class="options-list">
+                <li class="option-item" data-opt="A">A) Il punto di stoccaggio principale situato in Siberia da cui parte il gasdotto.</li>
+                <li class="option-item" data-opt="B">B) Il Punto di Scambio Virtuale, ovvero l'hub elettronico gestito da Snam Rete Gas in cui avviene l'incontro tra domanda e offerta di gas in Italia.</li>
+                <li class="option-item" data-opt="C">C) Il Prezzo Standard di Vendita definito dall'Autorità ARERA per i clienti domestici.</li>
+                <li class="option-item" data-opt="D">D) La pressione standard del vettore nei condotti di distribuzione ad alta pressione.</li>
+            </ul>
+            <div class="explanation-box"><strong>Nota didattica:</strong> È il fulcro della contabilità del gas all'ingrosso italiano, espresso solitamente in €/MWh.</div>
+        </div>
+
+        <!-- D24 -->
+        <div class="quiz-card" data-correct="B">
+            <div class="q-number">Domanda 24</div>
+            <span class="category-badge cat-mercati">Mercati Energetici</span>
+            <div class="question-text">Cosa si intende per "Dispacciamento" nel sistema elettrico nazionale e quale entità ne è responsabile istituzionale in Italia?</div>
+            <ul class="options-list">
+                <li class="option-item" data-opt="A">A) La spedizione fisica delle bollette cartacee gestita da Poste Italiane.</li>
+                <li class="option-item" data-opt="B">B) L'attività di gestione coordinata delle immissioni e dei prelievi di energia sulla rete per garantire l'equilibrio costante tra produzione e consumo, gestita da Terna S.p.A.</li>
+                <li class="option-item" data-opt="C">C) La fatturazione dei costi di trasporto operata dalle aziende municipalizzate locali.</li>
+                <li class="option-item" data-opt="D">D) La disconnessione programmata delle utenze industriali morose.</li>
+            </ul>
+            <div class="explanation-box"><strong>Nota didattica:</strong> Bilanciamento in tempo reale tra generazione e consumo sulla rete nazionale in alta tensione.</div>
+        </div>
+
+        <!-- D25 -->
+        <div class="quiz-card" data-correct="B">
+            <div class="q-number">Domanda 25</div>
+            <span class="category-badge cat-mercati">Mercati Energetici</span>
+            <div class="question-text">Un profilo di prezzo dell'energia elettrica di tipo "Peakload" fa riferimento ai prelievi operati nei mercati all'ingrosso durante quali fasce orarie e giorni?</div>
+            <ul class="options-list">
+                <li class="option-item" data-opt="A">A) Esclusivamente nelle ore notturne dei giorni festivi e weekend.</li>
+                <li class="option-item" data-opt="B">B) Nelle ore di picco di carico del sistema, tipicamente dalle 8:00 alle 20:00 dei giorni lavorativi feriali (lunedì-venerdì).</li>
+                <li class="option-item" data-opt="C">C) Durante i mesi estivi di luglio e agosto per l'intera giornata.</li>
+                <li class="option-item" data-opt="D">D) Esclusivamente quando si verificano blackout imprevisti sulla rete di trasmissione.</li>
+            </ul>
+            <div class="explanation-box"><strong>Nota didattica:</strong> Si contrappone al profilo Baseload (24h/24), identificando le ore diurne a maggior carico commerciale.</div>
+        </div>
+
+        <!-- D26 -->
+        <div class="quiz-card" data-correct="A">
+            <div class="q-number">Domanda 26</div>
+            <span class="category-badge cat-mercati">Mercati Energetici</span>
+            <div class="question-text">Quale componente della bolletta elettrica italiana è destinata a finanziare il sostegno alle fonti rinnovabili e le agevolazioni per le aziende energivore, rientrando nei cosiddetti Oneri di Sistema?</div>
+            <ul class="options-list">
+                <li class="option-item" data-opt="A">A) La quota ASOS.</li>
+                <li class="option-item" data-opt="B">B) La quota ARIM.</li>
+                <li class="option-item" data-opt="C">C) Il corrispettivo della Spesa Trasporto e Gestione Contatore.</li>
+                <li class="option-item" data-opt="D">D) L'accisa erariale di consumo e l'IVA applicata.</li>
+            </ul>
+            <div class="explanation-box"><strong>Nota didattica:</strong> La componente ASOS finanzia gli incentivi alle FER; la quota ARIM è destinata alle rimanenti coperture di sistema.</div>
+        </div>
+
+        <!-- D27 -->
+        <div class="quiz-card" data-correct="C">
+            <div class="q-number">Domanda 27</div>
+            <span class="category-badge cat-diagnosi">Diagnosi & Applicazioni</span>
+            <div class="question-text">Quale norma della serie UNI CEI EN 16247 stabilisce nello specifico i requisiti e i metodi metodologici dettagliati per condurre una diagnosi energetica nel settore dei PROCESSI INDUSTRIALI?</div>
+            <ul class="options-list">
+                <li class="option-item" data-opt="A">A) UNI EN ISO 19011</li>
+                <li class="option-item" data-opt="B) UNI CEI EN 16247-2</li>
+                <li class="option-item" data-opt="C) UNI CEI EN 16247-3</li>
+                <li class="option-item" data-opt="D">D) UNI CEI EN 16247-4</li>
+            </ul>
+            <div class="explanation-box"><strong>Nota didattica:</strong> Parte 3 specifica per i processi produttivi e linee industriali (essenziale per l'EGE Industriale).</div>
+        </div>
+
+        <!-- D28 -->
+        <div class="quiz-card" data-correct="C">
+            <div class="q-number">Domanda 28</div>
+            <span class="category-badge cat-diagnosi">Diagnosi & Applicazioni</span>
+            <div class="question-text">Ai sensi del D.Lgs. 102/2014, ogni quanti anni le "Grandi Imprese" e le imprese "Energivore" sono obbligate a rinnovare e inviare all'ENEA la propria Diagnosi Energetica?</div>
+            <ul class="options-list">
+                <li class="option-item" data-opt="A">A) Ogni anno, contestualmente alla dichiarazione dei redditi.</li>
+                <li class="option-item" data-opt="B">B) Ogni 2 anni, entro il 30 giugno.</li>
+                <li class="option-item" data-opt="C">C) Ogni 4 anni, entro il 5 dicembre dell'anno di scadenza.</li>
+                <li class="option-item" data-opt="D">D) La diagnosi si esegue una sola volta e ha validità indeterminata a meno di modifiche d'impianto.</li>
+            </ul>
+            <div class="explanation-box"><strong>Nota didattica:</strong> Il ciclo quadriennale obbligatorio costituisce il nucleo di pianificazione ispettiva dell'ENEA.</div>
+        </div>
+
+        <!-- D29 -->
+        <div class="quiz-card" data-correct="B">
+            <div class="q-number">Domanda 29</div>
+            <span class="category-badge cat-diagnosi">Diagnosi & Applicazioni</span>
+            <div class="question-text">Nel calcolo dell'indicatore economico VAN (Valore Attuale Netto) per un intervento di riqualificazione proposto da un EGE, cos'è il "Tasso di Attualizzazione"?</div>
+            <ul class="options-list">
+                <li class="option-item" data-opt="A">A) Il tasso di svalutazione annuale della componentistica meccanica degli impianti.</li>
+                <li class="option-item" data-opt="B) Un fattore finanziario utilizzato per convertire i flussi di cassa futuri nel loro valore equivalente al momento attuale, riflettendo il costo opportunità del denaro o il rischio.</li>
+                <li class="option-item" data-opt="C">C) La percentuale di tasse comunali applicate sulla compravendita di immobili efficienti.</li>
+                <li class="option-item" data-opt="D">D) Lo sconto commerciale applicato dal fornitore di tecnologia sul prezzo di listino.</li>
+            </ul>
+            <div class="explanation-box"><strong>Nota didattica:</strong> Serve a pesare il valore temporale dei flussi di cassa energetici attesi negli anni futuri.</div>
+        </div>
+
+        <!-- D30 -->
+        <div class="quiz-card" data-correct="B">
+            <div class="q-number">Domanda 30</div>
+            <span class="category-badge cat-diagnosi">Diagnosi & Applicazioni</span>
+            <div class="question-text">Nelle linee guida ENEA per le diagnosi energetiche industriali, cosa indica la percentuale minima di "Copertura dei dati misurati"?</div>
+            <ul class="options-list">
+                <li class="option-item" data-opt="A">A) La percentuale di superficie del tetto coperta da moduli fotovoltaici.</li>
+                <li class="option-item" data-opt="B">B) L'obbligo di misurare direttamente tramite contatori dedicati una quota minima dei consumi complessivi associati alle SEU, limitando le stime teoriche.</li>
+                <li class="option-item" data-opt="C">C) La percentuale di ore annuali in cui lo stabilimento è rimasto coperto da polizza assicurativa.</li>
+                <li class="option-item" data-opt="D">D) La quantità di bollette cartacee scannerizzate e archiviate nel cloud aziendale.</li>
+            </ul>
+            <div class="explanation-box"><strong>Nota didattica:</strong> ENEA impone l'installazione di misuratori fisici sul campo per dare certezza scientifica ai dati delle diagnosi.</div>
+        </div>
+
+    </div>
+
+    <!-- Pannello dei Risultati -->
+    <div class="result-panel">
+        <button class="btn-submit" id="submit-btn" onclick="evaluateQuiz()">Termina il Test e Verifica Punteggio</button>
+        <div id="results-area" style="display:none;">
+            <div class="score-display" id="score-text">Risposte Esatte: 0 / 30 (0%)</div>
+            <div id="outcome-badge-container"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Gestione della selezione delle opzioni
+    document.querySelectorAll('.option-item').forEach(item => {
+        item.addEventListener('click', function() {
+            // Se il quiz è già stato corretto, blocca i click
+            if(this.closest('.quiz-card').classList.contains('corrected')) return;
+
+            const parent = this.parentNode;
+            // Rimuovi lo stato "selezionato" dai fratelli
+            parent.querySelectorAll('.option-item').forEach(sibling => {
+                sibling.classList.remove('selected');
+            });
+            // Aggiungi selezione corrente
+            this.classList.add('selected');
+        });
+    });
+
+    function evaluateQuiz() {
+        const cards = document.querySelectorAll('.quiz-card');
+        let correctCount = 0;
+        let unansweredCount = 0;
+
+        cards.forEach(card => {
+            const correctAnswer = card.getAttribute('data-correct');
+            const selectedOption = card.querySelector('.option-item.selected');
+            
+            // Congela la scheda bloccando future modifiche
+            card.classList.add('corrected');
+
+            if (selectedOption) {
+                const chosenLetter = selectedOption.getAttribute('data-opt');
+                if (chosenLetter === correctAnswer) {
+                    correctCount++;
+                    selectedOption.classList.add('is-correct');
+                } else {
+                    selectedOption.classList.add('is-wrong');
+                    // Mostra comunque l'opzione corretta in verde per feedback visivo
+                    card.querySelector(`[data-opt="${correctAnswer}"]`).classList.add('is-correct');
+                }
+            } else {
+                unansweredCount++;
+                // Se non ha risposto, evidenzia comunque la corretta
+                card.querySelector(`[data-opt="${correctAnswer}"]`).classList.add('is-correct');
+            }
+
+            // Mostra la spiegazione teorica sotto ogni domanda
+            card.querySelector('.explanation-box').style.display = 'block';
+        });
+
+        // Calcolo percentuali
+        const percentage = Math.round((correctCount / cards.length) * 100);
+        
+        // Aggiorna interfaccia risultati
+        const scoreText = document.getElementById('score-text');
+        scoreText.textContent = `Risposte Esatte: ${correctCount} / 30 (${percentage}%)`;
+        
+        const badgeContainer = document.getElementById('outcome-badge-container');
+        badgeContainer.innerHTML = ''; // svuota precedente
+        
+        const badge = document.createElement('div');
+        badge.classList.add('outcome-badge');
+        
+        if (percentage >= 60) {
+            badge.textContent = "Test Superato! Oltre il 60%";
+            badge.classList.add('outcome-pass');
+        } else {
+            badge.textContent = "Test Non Superato - Sotto il 60%";
+            badge.classList.add('outcome-fail');
+        }
+        
+        badgeContainer.appendChild(badge);
+        document.getElementById('results-area').style.display = 'block';
+        
+        // Disabilita il pulsante invio
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Test Analizzato e Corretto";
+        submitBtn.style.opacity = '0.6';
+        submitBtn.style.cursor = 'not-allowed';
+
+        // Scroll automatico al pannello risultati
+        document.querySelector('.result-panel').scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>
